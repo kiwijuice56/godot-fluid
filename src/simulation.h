@@ -17,15 +17,26 @@ private:
     float viscosity = 1.0;
 
     // Numerical density arrays in 9 directions
-    float* n0;
-    float* nN;
-    float* nNE;
-    float* nE;
-    float* nSE;
-    float* nS;
-    float* nSW;
-    float* nW;
-    float* nNW;
+    std::vector<float> n0;
+    std::vector<float> nN;
+    std::vector<float> nNE;
+    std::vector<float> nE;
+    std::vector<float> nSE;
+    std::vector<float> nS;
+    std::vector<float> nSW;
+    std::vector<float> nW;
+    std::vector<float> nNW;
+
+    //Buffer for above arrays
+    std::vector<float> bn0;
+    std::vector<float> bnN;
+    std::vector<float> bnNE;
+    std::vector<float> bnE;
+    std::vector<float> bnSE;
+    std::vector<float> bnS;
+    std::vector<float> bnSW;
+    std::vector<float> bnW;
+    std::vector<float> bnNW;
 
     Ref<Image> render_image;
 
@@ -36,6 +47,7 @@ public:
 	Simulation();
 	~Simulation();
 
+    void initialize();
     void step();
     void set_size(int width, int height);
     Ref<ImageTexture> get_render_texture();
