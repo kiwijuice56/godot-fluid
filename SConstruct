@@ -13,19 +13,19 @@ env = SConscript("godot-cpp/SConstruct")
 # - LINKFLAGS are for linking flags
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
-env.Append(CPPPATH=["extension/include/", "extension/src/"])
-sources = Glob("extension/src/*.cpp")
+env.Append(CPPPATH=["src/"])
+sources = Glob("src/*.cpp")
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        "game/bin/libfluid.{}.{}.framework/libfluid.{}.{}".format(
+        "godot-project/bin/libfluid.{}.{}.framework/libfluid.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
     )
 else:
     library = env.SharedLibrary(
-        "game/bin/libfluid{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "godot-project/bin/libfluid{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 

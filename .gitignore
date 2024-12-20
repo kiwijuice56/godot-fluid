@@ -6,3 +6,6 @@
 *.dblite
 *.dll
 *.so
+*.obj
+*.exp
+*.lib

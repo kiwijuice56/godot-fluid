@@ -14,6 +14,19 @@ private:
     int width = 256;
     int height = 256;
 
+    float viscosity = 1.0;
+
+    // Numerical density arrays in 9 directions
+    float* n0;
+    float* nN;
+    float* nNE;
+    float* nE;
+    float* nSE;
+    float* nS;
+    float* nSW;
+    float* nW;
+    float* nNW;
+
     Ref<Image> render_image;
 
 protected:

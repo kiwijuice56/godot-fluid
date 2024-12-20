@@ -22,6 +22,11 @@ Simulation::~Simulation() {
 void Simulation::step() {
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
+            // Compute macroscopic density and velocity
+
+            // Compute equilibrium density
+
+            // Update number densities
             render_image->set_pixel(x, y, Color(0.5, 0.8, 0.1));
         }
     }
