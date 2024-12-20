@@ -7,8 +7,10 @@ script = ExtResource("1_53q0u")
 
 [node name="FluidCanvas" type="TextureRect" parent="."]
 unique_name_in_owner = true
+texture_filter = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+stretch_mode = 4

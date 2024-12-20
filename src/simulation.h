@@ -14,7 +14,7 @@ private:
     int width = 256;
     int height = 256;
 
-    float viscosity = 1.0;
+    float viscosity = 0.1;
 
     // Numerical density arrays in 9 directions
     std::vector<float> n0;
@@ -43,13 +43,17 @@ private:
 protected:
 	static void _bind_methods();
 
+    void initialize();
+    void step();
+    bool in_bounds(int x, int y);
+    int get_index(int x, int y);
+    void set_size(int width, int height);
+    Ref<ImageTexture> get_render_texture();
+
 public:
 	Simulation();
 	~Simulation();
 
-    void initialize();
-    void step();
-    void set_size(int width, int height);
-    Ref<ImageTexture> get_render_texture();
+
 };
 }
