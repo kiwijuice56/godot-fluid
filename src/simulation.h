@@ -14,7 +14,7 @@ private:
     int width = 256;
     int height = 256;
 
-    float viscosity = 0.1;
+    float viscosity = 0.8;
 
     // Numerical density arrays in 9 directions
     std::vector<float> n0;
@@ -26,17 +26,6 @@ private:
     std::vector<float> nSW;
     std::vector<float> nW;
     std::vector<float> nNW;
-
-    //Buffer for above arrays
-    std::vector<float> bn0;
-    std::vector<float> bnN;
-    std::vector<float> bnNE;
-    std::vector<float> bnE;
-    std::vector<float> bnSE;
-    std::vector<float> bnS;
-    std::vector<float> bnSW;
-    std::vector<float> bnW;
-    std::vector<float> bnNW;
 
     Ref<Image> render_image;
 

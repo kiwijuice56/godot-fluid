@@ -13,5 +13,5 @@ func _input(event: InputEvent) -> void:
 		simulation.step()
 
 func _process(delta: float) -> void:
-	#simulation.step()
+	simulation.step()
 	%FluidCanvas.texture = simulation.get_render_texture()
