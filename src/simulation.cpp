@@ -32,32 +32,42 @@ void Simulation::initialize() {
     nSW.resize(width * height);
     nW.resize(width * height);
     nNW.resize(width * height);
+    wall.resize(width * height);
+    total_vel_x.resize(width * height);
+    total_vel_y.resize(width * height);
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
-            n0[i] = 4. / 9.;
-            nN[i] = 1. / 9.;
-            nNE[i] = 1. / 36.;
+            n0[i] = 1.0;
+            nN[i] =  y / float(height);
+            nNE[i] = y / float(height);
             nE[i] = 1. / 9.;
-            nSE[i] = 1. / 36.;
-            nS[i] = 1. / 9.;
+            nSE[i] = 1. / 2.;
+            nS[i] = 0;
             nSW[i] = 1. / 36.;
             nW[i] = 1. / 9.;
             nNW[i] = 1. / 36.;
+
+            float r_x = 300 - x;
+            float r_y = 300 - y;
+            float r_x2 = 240 - x;
+            float r_y2 = 128 - y;
+            if (y <= 3 || x <= 3 || y >= height - 4 || x >= width - 4 || ((y/8) % 2 == 0 && x > 32 && x < 90 && y > 100 && y < 300) || (r_x * r_x + r_y * r_y < 700) || (r_x2 * r_x2 + r_y2 * r_y2 < 900)) {
+                wall[i] = true;
+            }
         }
     }
 }
 
 void Simulation::step() {
+    // Collision
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
 
             // Compute macroscopic density and velocity
             float density = n0[i] + nN[i] + nNE[i] + nE[i] + nSE[i] + nS[i] + nSW[i] + nW[i] + nNW[i];
-
-            render_image->set_pixel(x, y, Color(0.0, 0.0, density / 4.0));
 
             float vel_y = (nN[i] - nS[i] + nNE[i] - nSE[i] + nNW[i] - nSW[i]) / density;
             float vel_x = (nE[i] - nW[i] + nNE[i] - nNW[i] + nSE[i] - nSW[i]) / density;
@@ -66,7 +76,8 @@ void Simulation::step() {
                 vel_y = 0;
             }
 
-            render_image->set_pixel(x, y, Color(vel_x, vel_y, density / 4.0));
+            total_vel_x[i] = vel_x;
+            total_vel_y[i] = vel_y;
 
             float vel_sq = vel_x * vel_x + vel_y * vel_y;
 
@@ -92,19 +103,22 @@ void Simulation::step() {
             nW[i] = nW[i] + viscosity * (nWeq - nW[i]);
             nNW[i] = nNW[i] + viscosity * (nNWeq - nNW[i]);
 
-            if (n0[i] < 0)  n0[i] = 0;
-            if (nN[i] < 0)  nN[i] = 0;
-            if (nNE[i] < 0) nNE[i] = 0;
-            if (nE[i] < 0)  nE[i] = 0;
-            if (nSE[i] < 0) nSE[i] = 0;
-            if (nS[i] < 0)  nS[i] = 0;
-            if (nSW[i] < 0) nSW[i] = 0;
-            if (nW[i] < 0)  nW[i] = 0;
-            if (nNW[i] < 0) nNW[i] = 0;
+            if (wall[i] || n0[i] < 0)  n0[i] = 0;
+            if (wall[i] || nN[i] < 0)  nN[i] = 0;
+            if (wall[i] || nNE[i] < 0) nNE[i] = 0;
+            if (wall[i] || nE[i] < 0)  nE[i] = 0;
+            if (wall[i] || nSE[i] < 0) nSE[i] = 0;
+            if (wall[i] || nS[i] < 0)  nS[i] = 0;
+            if (wall[i] || nSW[i] < 0) nSW[i] = 0;
+            if (wall[i] || nW[i] < 0)  nW[i] = 0;
+            if (wall[i] || nNW[i] < 0) nNW[i] = 0;
+
+            if (wall[i]) {
+                total_vel_x[i] = 0;
+                total_vel_y[i] = 0;
+            }
         }
     }
-
-    // Streaming
 
     // NW corner
     for (int y = 0; y < height; y++) {
@@ -135,21 +149,39 @@ void Simulation::step() {
         }
     }
 
-    // Source
+    // Wall bounces
     for (int y = 0; y < height; y++) {
-        nE[get_index(0, y)] = (1. / 9.) * 0.3 + UtilityFunctions::randf() * .2;
-        nNE[get_index(0, y)] = (1. / 36.) * 0.2 + (y / float(height)) * .2;
-        nSE[get_index(0, y)] = (1. / 36.) * 0.1 + (y / float(height)) * .2;
+        for (int x = 0; x < width; x++) {
+            int i = get_index(x, y);
+            if (!wall[i]) continue;
+            if (in_bounds(x + 0, y - 1)) nN[get_index(x + 0, y - 1)] += nS[i];
+            if (in_bounds(x + 1, y - 1)) nNE[get_index(x + 1, y - 1)] += nSW[i];
+            if (in_bounds(x + 1, y + 0)) nE[get_index(x + 1, y + 0)] += nW[i];
+            if (in_bounds(x + 1, y + 1)) nSE[get_index(x + 1, y + 1)] += nNW[i];
+            if (in_bounds(x + 0, y + 1)) nS[get_index(x + 0, y + 1)] += nN[i];
+            if (in_bounds(x - 1, y + 1)) nSW[get_index(x - 1, y + 1)] += nNE[i];
+            if (in_bounds(x - 1, y + 0)) nW[get_index(x - 1, y + 0)] += nE[i];
+            if (in_bounds(x - 1, y - 1)) nNW[get_index(x - 1, y - 1)] += nSE[i];
+        }
     }
 
+    // Rendering
+    for (int y = 1; y < height - 1; y++) {
+        for (int x = 1; x < width - 1; x++) {
+            int i = get_index(x, y);
+            float curl = (total_vel_y[get_index(x + 1, y)] - total_vel_y[get_index(x - 1, y)]) - (total_vel_x[get_index(x, y + 1) ] - total_vel_x[get_index(x, y - 1)]);
+            float density = n0[i] + nN[i] + nNE[i] + nE[i] + nSE[i] + nS[i] + nSW[i] + nW[i] + nNW[i];
+            render_image->set_pixel(x, y, Color(density / 16.0, density / 8.0, density / 4.0));
+        }
+    }
 }
 
 
-bool Simulation::in_bounds(int x, int y) {
+inline bool Simulation::in_bounds(int x, int y) {
     return x >= 0 && y >= 0 && x < width && y < height;
 }
 
-int Simulation::get_index(int x, int y) {
+inline int Simulation::get_index(int x, int y) {
     return y * width + x;
 }
 

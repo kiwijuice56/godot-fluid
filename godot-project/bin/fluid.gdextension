@@ -6,4 +6,4 @@ reloadable = true
 
 [libraries]
 
-windows.x86_64 = "res://bin/libfluid.windows.template_debug.x86_64.dll"
+windows.x86_64 = "res://bin/libfluid.windows.template_release.x86_64.dll"
