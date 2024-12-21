@@ -36,15 +36,15 @@ void Simulation::initialize() {
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
-            n0[i] = 1.0;
-            nN[i] =  0;
-            nNE[i] = 0;
-            nE[i] =  0;
-            nSE[i] = 0;
-            nS[i] =  0;
-            nSW[i] = 0;
-            nW[i] =  0;
-            nNW[i] = 0;
+            n0[i] = 4. / 9.;
+            nN[i] = 1. / 9.;
+            nNE[i] = 1. / 36.;
+            nE[i] = 1. / 9.;
+            nSE[i] = 1. / 36.;
+            nS[i] = 1. / 9.;
+            nSW[i] = 1. / 36.;
+            nW[i] = 1. / 9.;
+            nNW[i] = 1. / 36.;
         }
     }
 }
@@ -65,6 +65,8 @@ void Simulation::step() {
                 vel_x = 0;
                 vel_y = 0;
             }
+
+            render_image->set_pixel(x, y, Color(vel_x, vel_y, density / 4.0));
 
             float vel_sq = vel_x * vel_x + vel_y * vel_y;
 
@@ -135,9 +137,9 @@ void Simulation::step() {
 
     // Source
     for (int y = 0; y < height; y++) {
-        nE[get_index(0, y)] = (1. / 9.) * 0.1 + UtilityFunctions::randf() * .5;
-        nNE[get_index(0, y)] = (1. / 36.) * 0.1 + UtilityFunctions::randf() * .5;
-        nSE[get_index(0, y)] = (1. / 36.) * 0.1 + UtilityFunctions::randf() * .5;
+        nE[get_index(0, y)] = (1. / 9.) * 0.3 + UtilityFunctions::randf() * .2;
+        nNE[get_index(0, y)] = (1. / 36.) * 0.2 + (y / float(height)) * .2;
+        nSE[get_index(0, y)] = (1. / 36.) * 0.1 + (y / float(height)) * .2;
     }
 
 }

@@ -4,6 +4,7 @@ var simulation: Simulation
 
 func _ready() -> void:
 	simulation = Simulation.new()
+	simulation.set_size(512, 512)
 	simulation.initialize()
 
 func _input(event: InputEvent) -> void:

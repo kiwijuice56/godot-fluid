@@ -14,7 +14,7 @@ private:
     int width = 256;
     int height = 256;
 
-    float viscosity = 0.8;
+    float viscosity = 0.3;
 
     // Numerical density arrays in 9 directions
     std::vector<float> n0;
