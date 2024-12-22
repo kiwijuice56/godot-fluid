@@ -1,9 +1,10 @@
 [configuration]
 
 entry_symbol = "fluid_init"
-compatibility_minimum = "4.3"
+compatibility_minimum = "4.4"
 reloadable = true
 
 [libraries]
 
 windows.x86_64 = "res://bin/libfluid.windows.template_release.x86_64.dll"
+web = "res://bin/libfluid.web.template_release.wasm32.wasm"

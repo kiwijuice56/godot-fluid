@@ -67,6 +67,20 @@ void Simulation::step() {
         for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
 
+            if (wall[i]) {
+                n0[i] =  0.;
+                nN[i] =  0.;
+                nNE[i] = 0.;
+                nE[i] =  0.;
+                nSE[i] = 0.;
+                nS[i] =  0.;
+                nSW[i] = 0.;
+                nW[i] =  0.;
+                nNW[i] = 0.;
+
+                continue;
+            }
+
             // Compute macroscopic density and velocity
             float density = n0[i] + nN[i] + nNE[i] + nE[i] + nSE[i] + nS[i] + nSW[i] + nW[i] + nNW[i];
 
@@ -97,15 +111,15 @@ void Simulation::step() {
             nW[i] = nW[i] + viscosity * (nWeq - nW[i]);
             nNW[i] = nNW[i] + viscosity * (nNWeq - nNW[i]);
 
-            if (wall[i] || n0[i] < 0)  n0[i] = 0;
-            if (wall[i] || nN[i] < 0)  nN[i] = 0;
-            if (wall[i] || nNE[i] < 0) nNE[i] = 0;
-            if (wall[i] || nE[i] < 0)  nE[i] = 0;
-            if (wall[i] || nSE[i] < 0) nSE[i] = 0;
-            if (wall[i] || nS[i] < 0)  nS[i] = 0;
-            if (wall[i] || nSW[i] < 0) nSW[i] = 0;
-            if (wall[i] || nW[i] < 0)  nW[i] = 0;
-            if (wall[i] || nNW[i] < 0) nNW[i] = 0;
+            if (n0[i] < 0)  n0[i] = 0;
+            if (nN[i] < 0)  nN[i] = 0;
+            if (nNE[i] < 0) nNE[i] = 0;
+            if (nE[i] < 0)  nE[i] = 0;
+            if (nSE[i] < 0) nSE[i] = 0;
+            if (nS[i] < 0)  nS[i] = 0;
+            if (nSW[i] < 0) nSW[i] = 0;
+            if (nW[i] < 0)  nW[i] = 0;
+            if (nNW[i] < 0) nNW[i] = 0;
         }
     }
 
@@ -177,15 +191,21 @@ void Simulation::pulse(int pulse_x, int pulse_y, int pulse_radius, float strengt
             float y_d = (y - pulse_y);
             float radius = x_d * x_d + y_d * y_d;
 
-            if (radius > pulse_radius) continue;
+            if (radius > pulse_radius * pulse_radius) continue;
 
             int i = get_index(x, y);
 
-            n0[i] -= strength;
-            nN[i] += strength;
-            nS[i] += strength;
-            nE[i] += strength;
-            nW[i] += strength;
+            float cell_strength = strength * UtilityFunctions::randf();
+
+            n0[i] -= cell_strength * (4. / 9.);
+            nN[i] += cell_strength * (1. / 9.);
+            nS[i] += cell_strength * (1. / 9.);
+            nE[i] += cell_strength * (1. / 9.);
+            nW[i] += cell_strength * (1. / 9.);
+            nNE[i] += cell_strength * (1. / 36.);
+            nSE[i] += cell_strength * (1. / 36.);
+            nNW[i] += cell_strength * (1. / 36.);
+            nSW[i] += cell_strength * (1. / 36.);
         }
     }
 }

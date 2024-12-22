@@ -2,6 +2,9 @@
 .godot/
 /android/
 
+# VSCode configs
+.vscode
+
 # Binary files
 *.dblite
 *.dll
@@ -9,3 +12,6 @@
 *.obj
 *.exp
 *.lib
+*.wasm
+*.pck
+*.o
