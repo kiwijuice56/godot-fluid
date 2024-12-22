@@ -7,4 +7,4 @@ reloadable = true
 [libraries]
 
 windows.x86_64 = "res://bin/libfluid.windows.template_release.x86_64.dll"
-web = "res://bin/libfluid.web.template_release.wasm32.wasm"
+web = "res://bin/libfluid.web.template_release.wasm32.nothreads.wasm"
