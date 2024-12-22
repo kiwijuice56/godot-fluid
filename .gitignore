@@ -12,5 +12,4 @@
 *.obj
 *.exp
 *.lib
-*.wasm
 *.o
