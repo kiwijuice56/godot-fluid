@@ -13,5 +13,4 @@
 *.exp
 *.lib
 *.wasm
-*.pck
 *.o
