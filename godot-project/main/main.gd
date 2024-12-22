@@ -12,6 +12,9 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		start = true
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		var mouse_position: Vector2 = get_viewport().get_mouse_position()
+		simulation.pulse(mouse_position.x, mouse_position.y, 64.0, .5)
 
 func _process(delta: float) -> void:
 	if start:

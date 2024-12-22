@@ -14,7 +14,7 @@ private:
     int width = 256;
     int height = 256;
 
-    float viscosity = 0.7;
+    float viscosity = 0.4;
 
     // Numerical density arrays in 9 directions
     std::vector<float> n0;
@@ -27,9 +27,6 @@ private:
     std::vector<float> nW;
     std::vector<float> nNW;
 
-    std::vector<float> total_vel_x;
-    std::vector<float> total_vel_y;
-
     // Whether a cell contains a solid wall
     std::vector<bool> wall;
 
@@ -40,15 +37,16 @@ protected:
 
     void initialize();
     void step();
+    void pulse(int pulse_x, int pulse_y, int pulse_radius, float strength);
+
     inline bool in_bounds(int x, int y);
     inline int get_index(int x, int y);
+
     void set_size(int width, int height);
     Ref<ImageTexture> get_render_texture();
 
 public:
 	Simulation();
 	~Simulation();
-
-
 };
 }

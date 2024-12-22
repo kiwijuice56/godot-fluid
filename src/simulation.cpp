@@ -8,6 +8,7 @@ using namespace godot;
 void Simulation::_bind_methods() {
     ClassDB::bind_method(D_METHOD("initialize"), &Simulation::initialize);
     ClassDB::bind_method(D_METHOD("step"), &Simulation::step);
+    ClassDB::bind_method(D_METHOD("pulse"), &Simulation::pulse);
     ClassDB::bind_method(D_METHOD("set_size", "width", "height"), &Simulation::set_size);
     ClassDB::bind_method(D_METHOD("get_render_texture"), &Simulation::get_render_texture);
 }
@@ -33,22 +34,22 @@ void Simulation::initialize() {
     nW.resize(width * height);
     nNW.resize(width * height);
     wall.resize(width * height);
-    total_vel_x.resize(width * height);
-    total_vel_y.resize(width * height);
 
+    // Setup initial density
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
             n0[i] = 1.0;
-            nN[i] =  y / float(height);
+            nN[i] =  y / float(height); // Some initial north velocity
             nNE[i] = y / float(height);
             nE[i] = 1. / 9.;
             nSE[i] = 1. / 2.;
-            nS[i] = 0;
+            nS[i] = 1. / 9.;
             nSW[i] = 1. / 36.;
             nW[i] = 1. / 9.;
             nNW[i] = 1. / 36.;
 
+            // Setup wall shapes
             float r_x = 300 - x;
             float r_y = 300 - y;
             float r_x2 = 240 - x;
@@ -71,13 +72,6 @@ void Simulation::step() {
 
             float vel_y = (nN[i] - nS[i] + nNE[i] - nSE[i] + nNW[i] - nSW[i]) / density;
             float vel_x = (nE[i] - nW[i] + nNE[i] - nNW[i] + nSE[i] - nSW[i]) / density;
-            if (density < 0.001) {
-                vel_x = 0;
-                vel_y = 0;
-            }
-
-            total_vel_x[i] = vel_x;
-            total_vel_y[i] = vel_y;
 
             float vel_sq = vel_x * vel_x + vel_y * vel_y;
 
@@ -112,13 +106,10 @@ void Simulation::step() {
             if (wall[i] || nSW[i] < 0) nSW[i] = 0;
             if (wall[i] || nW[i] < 0)  nW[i] = 0;
             if (wall[i] || nNW[i] < 0) nNW[i] = 0;
-
-            if (wall[i]) {
-                total_vel_x[i] = 0;
-                total_vel_y[i] = 0;
-            }
         }
     }
+
+    // Streaming
 
     // NW corner
     for (int y = 0; y < height; y++) {
@@ -166,12 +157,35 @@ void Simulation::step() {
     }
 
     // Rendering
-    for (int y = 1; y < height - 1; y++) {
-        for (int x = 1; x < width - 1; x++) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
-            float curl = (total_vel_y[get_index(x + 1, y)] - total_vel_y[get_index(x - 1, y)]) - (total_vel_x[get_index(x, y + 1) ] - total_vel_x[get_index(x, y - 1)]);
             float density = n0[i] + nN[i] + nNE[i] + nE[i] + nSE[i] + nS[i] + nSW[i] + nW[i] + nNW[i];
             render_image->set_pixel(x, y, Color(density / 16.0, density / 8.0, density / 4.0));
+        }
+    }
+}
+
+void Simulation::pulse(int pulse_x, int pulse_y, int pulse_radius, float strength) {
+    if (!in_bounds(pulse_x, pulse_y)) return;
+
+    for (int y = pulse_y - pulse_radius; y < pulse_y + pulse_radius; y++) {
+        for (int x = pulse_x - pulse_radius; x < pulse_x + pulse_radius; x++) {
+            if (!in_bounds(x, y)) continue;
+
+            float x_d = (x - pulse_x);
+            float y_d = (y - pulse_y);
+            float radius = x_d * x_d + y_d * y_d;
+
+            if (radius > pulse_radius) continue;
+
+            int i = get_index(x, y);
+
+            n0[i] -= strength;
+            nN[i] += strength;
+            nS[i] += strength;
+            nE[i] += strength;
+            nW[i] += strength;
         }
     }
 }
@@ -188,7 +202,6 @@ inline int Simulation::get_index(int x, int y) {
 void Simulation::set_size(int width, int height) {
     this->width = width;
     this->height = height;
-
     initialize();
 }
 
