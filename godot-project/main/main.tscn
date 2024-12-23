@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://0addejn8nxb1"]
+[gd_scene load_steps=4 format=3 uid="uid://0addejn8nxb1"]
 
 [ext_resource type="Script" uid="uid://bymmsr0rdirjr" path="res://main/main.gd" id="1_53q0u"]
+
+[sub_resource type="Gradient" id="Gradient_53q0u"]
+offsets = PackedFloat32Array(0, 0.134351, 0.290076, 0.425954, 0.578626, 1)
+colors = PackedColorArray(0.282353, 0.156863, 0.431373, 1, 0.207843, 0.364706, 0.560784, 1, 0.121569, 0.584314, 0.556863, 1, 0.466667, 0.760784, 0.341176, 1, 0.913725, 0.898039, 0.0980392, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_pjrb6"]
+gradient = SubResource("Gradient_53q0u")
+width = 32
 
 [node name="Main" type="Node"]
 script = ExtResource("1_53q0u")
@@ -16,4 +24,7 @@ grow_vertical = 2
 stretch_mode = 4
 
 [node name="Simulation" type="Simulation" parent="."]
+size = Vector2i(300, 212)
+visual_density_cap = 10.0
+palette = SubResource("GradientTexture1D_pjrb6")
 unique_name_in_owner = true

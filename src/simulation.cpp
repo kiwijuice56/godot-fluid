@@ -209,7 +209,12 @@ void Simulation::step() {
         for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
             float density = n0[i] + nN[i] + nNE[i] + nE[i] + nSE[i] + nS[i] + nSW[i] + nW[i] + nNW[i];
-            render_image->set_pixel(x, y, Color(density / 16.0, density / 8.0, density / 4.0));
+
+            float offset = density / visual_density_cap;
+            if (offset > 1.) offset = 1.;
+            Color sample = palette->get_gradient()->sample(offset);
+
+            render_image->set_pixel(x, y, sample);
         }
     }
 }

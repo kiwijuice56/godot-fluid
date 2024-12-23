@@ -5,7 +5,7 @@
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/gradient_texture1_d.hpp>
-
+#include <godot_cpp/classes/gradient.hpp>
 namespace godot {
 
 class Simulation : public Node {
