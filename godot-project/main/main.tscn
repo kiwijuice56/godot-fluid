@@ -14,3 +14,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 stretch_mode = 4
+
+[node name="Simulation" type="Simulation" parent="."]
+unique_name_in_owner = true

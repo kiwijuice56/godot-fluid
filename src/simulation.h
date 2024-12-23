@@ -4,6 +4,7 @@
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/gradient_texture1_d.hpp>
 
 namespace godot {
 
@@ -11,6 +12,7 @@ class Simulation : public Node {
 	GDCLASS(Simulation, Node);
 
 private:
+    Vector2i size = Vector2i(350, 256);
     int width = 256;
     int height = 256;
 
@@ -32,17 +34,30 @@ private:
 
     Ref<Image> render_image;
 
+    // Render settings
+    Ref<GradientTexture1D> palette;
+    float visual_density_cap = 8.0;
+
 protected:
 	static void _bind_methods();
 
+    // Main interface methods
     void initialize();
     void step();
     void pulse(int pulse_x, int pulse_y, int pulse_radius, float strength);
 
+    // Simulation helper methods
     inline bool in_bounds(int x, int y);
     inline int get_index(int x, int y);
 
-    void set_size(int width, int height);
+    // Boilerplate getters/setters
+    void set_size(Vector2i size);
+    void set_palette(Ref<GradientTexture1D> palette);
+    void set_visual_density_cap(float val);
+
+    Vector2i get_size();
+    Ref<GradientTexture1D> get_palette();
+    float get_visual_density_cap();
     Ref<ImageTexture> get_render_texture();
 
 public:

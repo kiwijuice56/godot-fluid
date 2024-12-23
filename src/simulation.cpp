@@ -9,8 +9,38 @@ void Simulation::_bind_methods() {
     ClassDB::bind_method(D_METHOD("initialize"), &Simulation::initialize);
     ClassDB::bind_method(D_METHOD("step"), &Simulation::step);
     ClassDB::bind_method(D_METHOD("pulse"), &Simulation::pulse);
-    ClassDB::bind_method(D_METHOD("set_size", "width", "height"), &Simulation::set_size);
+
+    ClassDB::bind_method(D_METHOD("set_size", "size"), &Simulation::set_size);
+    ClassDB::bind_method(D_METHOD("set_palette", "palette"), &Simulation::set_palette);
+    ClassDB::bind_method(D_METHOD("set_visual_density_cap", "val"), &Simulation::set_visual_density_cap);
+
+    ClassDB::bind_method(D_METHOD("get_size"), &Simulation::get_size);
+    ClassDB::bind_method(D_METHOD("get_palette"), &Simulation::get_palette);
+    ClassDB::bind_method(D_METHOD("get_visual_density_cap"), &Simulation::get_visual_density_cap);
     ClassDB::bind_method(D_METHOD("get_render_texture"), &Simulation::get_render_texture);
+
+    ADD_PROPERTY(
+        PropertyInfo(Variant::VECTOR2I, "size"),
+        "set_size",
+        "get_size"
+    );
+
+    ADD_PROPERTY(
+        PropertyInfo(Variant::FLOAT, "visual_density_cap"),
+        "set_visual_density_cap",
+        "get_visual_density_cap"
+    );
+
+    ADD_PROPERTY(
+        PropertyInfo(
+            Variant::OBJECT,
+            "palette",
+            PROPERTY_HINT_RESOURCE_TYPE,
+            "GradientTexture1D"
+        ),
+        "set_palette",
+        "get_palette"
+    );
 }
 
 Simulation::Simulation() {
@@ -22,6 +52,9 @@ Simulation::~Simulation() {
 }
 
 void Simulation::initialize() {
+    width = size.x;
+    height = size.y;
+
     render_image = Image::create_empty(width, height, false, Image::FORMAT_RGBA8);
 
     n0.resize(width * height);
@@ -35,13 +68,13 @@ void Simulation::initialize() {
     nNW.resize(width * height);
     wall.resize(width * height);
 
-    // Setup initial density
+    // Setup initial state
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
             n0[i] = 1.0;
-            nN[i] =  y / float(height); // Some initial north velocity
-            nNE[i] = y / float(height);
+            nN[i] =  1. / 9;
+            nNE[i] = 1. / 36;
             nE[i] = 1. / 9.;
             nSE[i] = 1. / 2.;
             nS[i] = 1. / 9.;
@@ -49,12 +82,13 @@ void Simulation::initialize() {
             nW[i] = 1. / 9.;
             nNW[i] = 1. / 36.;
 
-            // Setup wall shapes
-            float r_x = 300 - x;
-            float r_y = 300 - y;
+            float r_x = 64 - x;
+            float r_y = 64 - y;
             float r_x2 = 240 - x;
             float r_y2 = 128 - y;
-            if (y <= 3 || x <= 3 || y >= height - 4 || x >= width - 4 || ((y/8) % 2 == 0 && x > 32 && x < 90 && y > 100 && y < 300) || (r_x * r_x + r_y * r_y < 700) || (r_x2 * r_x2 + r_y2 * r_y2 < 900)) {
+
+            // Setup walls
+            if (y <= 3 || x <= 3 || y >= height - 4 || x >= width - 4 || (r_x * r_x + r_y * r_y < 700) || (r_x2 * r_x2 + r_y2 * r_y2 < 900)) {
                 wall[i] = true;
             }
         }
@@ -195,7 +229,7 @@ void Simulation::pulse(int pulse_x, int pulse_y, int pulse_radius, float strengt
 
             int i = get_index(x, y);
 
-            float cell_strength = strength * UtilityFunctions::randf();
+            float cell_strength = strength * (1. - radius / (pulse_radius * pulse_radius));
 
             n0[i] -= cell_strength * (4. / 9.);
             nN[i] += cell_strength * (1. / 9.);
@@ -219,11 +253,30 @@ inline int Simulation::get_index(int x, int y) {
     return y * width + x;
 }
 
-void Simulation::set_size(int width, int height) {
-    this->width = width;
-    this->height = height;
-    initialize();
+void Simulation::set_size(Vector2i size) {
+    this->size = size;
 }
+
+void Simulation::set_palette(Ref<GradientTexture1D> palette) {
+    this->palette = palette;
+}
+
+void Simulation::set_visual_density_cap(float val) {
+    visual_density_cap = val;
+}
+
+Vector2i Simulation::get_size() {
+    return size;
+}
+
+Ref<GradientTexture1D> Simulation::get_palette() {
+    return palette;
+}
+
+float Simulation::get_visual_density_cap() {
+    return visual_density_cap;
+}
+
 
 Ref<ImageTexture> Simulation::get_render_texture() {
     return ImageTexture::create_from_image(render_image);
