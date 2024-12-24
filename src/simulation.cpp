@@ -13,11 +13,13 @@ void Simulation::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_size", "size"), &Simulation::set_size);
     ClassDB::bind_method(D_METHOD("set_palette", "palette"), &Simulation::set_palette);
     ClassDB::bind_method(D_METHOD("set_visual_density_cap", "val"), &Simulation::set_visual_density_cap);
+    ClassDB::bind_method(D_METHOD("set_wall_color", "color"), &Simulation::set_wall_color);
 
     ClassDB::bind_method(D_METHOD("get_size"), &Simulation::get_size);
     ClassDB::bind_method(D_METHOD("get_palette"), &Simulation::get_palette);
     ClassDB::bind_method(D_METHOD("get_visual_density_cap"), &Simulation::get_visual_density_cap);
     ClassDB::bind_method(D_METHOD("get_render_texture"), &Simulation::get_render_texture);
+    ClassDB::bind_method(D_METHOD("get_wall_color"), &Simulation::get_wall_color);
 
     ADD_PROPERTY(
         PropertyInfo(Variant::VECTOR2I, "size"),
@@ -40,6 +42,12 @@ void Simulation::_bind_methods() {
         ),
         "set_palette",
         "get_palette"
+    );
+
+    ADD_PROPERTY(
+        PropertyInfo(Variant::COLOR, "wall_color"),
+        "set_wall_color",
+        "get_wall_color"
     );
 }
 
@@ -92,6 +100,12 @@ void Simulation::initialize() {
                 wall[i] = true;
             }
         }
+    }
+
+    palette_cache.resize(cache_size);
+    for (int i = 0; i < cache_size; i++) {
+        float offset = i / (float) cache_size;
+        palette_cache[i] = palette->get_gradient()->sample(offset);
     }
 }
 
@@ -208,13 +222,19 @@ void Simulation::step() {
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int i = get_index(x, y);
-            float density = n0[i] + nN[i] + nNE[i] + nE[i] + nSE[i] + nS[i] + nSW[i] + nW[i] + nNW[i];
 
-            float offset = density / visual_density_cap;
-            if (offset > 1.) offset = 1.;
-            Color sample = palette->get_gradient()->sample(offset);
+            if (wall[i]) {
+                render_image->set_pixel(x, y, wall_color);
+            } else {
+                float density = n0[i] + nN[i] + nNE[i] + nE[i] + nSE[i] + nS[i] + nSW[i] + nW[i] + nNW[i];
 
-            render_image->set_pixel(x, y, sample);
+                float offset = density / visual_density_cap;
+                int index = (int) (offset * cache_size);
+                if (index >= cache_size) index = cache_size - 1;
+                Color sample = palette_cache[index];
+
+                render_image->set_pixel(x, y, sample);
+            }
         }
     }
 }
@@ -270,6 +290,10 @@ void Simulation::set_visual_density_cap(float val) {
     visual_density_cap = val;
 }
 
+void Simulation::set_wall_color(Color color) {
+    wall_color = color;
+}
+
 Vector2i Simulation::get_size() {
     return size;
 }
@@ -282,7 +306,10 @@ float Simulation::get_visual_density_cap() {
     return visual_density_cap;
 }
 
-
 Ref<ImageTexture> Simulation::get_render_texture() {
     return ImageTexture::create_from_image(render_image);
+}
+
+Color Simulation::get_wall_color() {
+    return wall_color;
 }

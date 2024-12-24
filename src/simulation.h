@@ -36,6 +36,11 @@ private:
 
     // Render settings
     Ref<GradientTexture1D> palette;
+    Color wall_color;
+
+    // Sampling a gradient is slow, so we sample many times and keep it in a vector
+    std::vector<Color> palette_cache;
+    int cache_size = 256;
     float visual_density_cap = 8.0;
 
 protected:
@@ -54,11 +59,13 @@ protected:
     void set_size(Vector2i size);
     void set_palette(Ref<GradientTexture1D> palette);
     void set_visual_density_cap(float val);
+    void set_wall_color(Color color);
 
     Vector2i get_size();
     Ref<GradientTexture1D> get_palette();
     float get_visual_density_cap();
     Ref<ImageTexture> get_render_texture();
+    Color get_wall_color();
 
 public:
 	Simulation();
