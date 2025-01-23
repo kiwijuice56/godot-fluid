@@ -25,7 +25,7 @@ stretch_mode = 4
 
 [node name="Simulation" type="Simulation" parent="."]
 size = Vector2i(300, 212)
-visual_density_cap = 10.0
+visual_density_cap = 9.0
 palette = SubResource("GradientTexture1D_pjrb6")
 wall_color = Color(0.0629067, 0.0574, 0.14, 1)
 unique_name_in_owner = true
